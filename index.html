@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Soccer Strategy Game</title>
+    <style>
+        :root { --grass-dark: #35682d; --grass-light: #3d7834; --line-color: rgba(255, 255, 255, 0.6); }
+        body { margin: 0; font-family: -apple-system, sans-serif; background-color: #111; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        body.resolving { pointer-events: none; }
+
+         #scoreboard { background: #000; padding: 18px 8px; text-align: center; font-size: clamp(20px, 5.5vw, 28px); font-weight: bold; z-index: 10; border-bottom: 2px solid #333; display: flex; justify-content: space-evenly; align-items: center; }
+        .score-box { color: #ffcc00; font-size: clamp(26px, 7vw, 38px); background: #222; padding: 6px 16px; border-radius: 8px; }
+
+        #score-row { background: #000; padding: 16px 12px; display: flex; justify-content: space-between; align-items: center; font-size: clamp(24px, 6.5vw, 34px); font-weight: bold; border-bottom: 2px solid #333; }
+        .score-team { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 6px; border-radius: 10px; border: 2px solid transparent; transition: all 0.25s ease; }
+        .score-team.active-attack { border-color: #2f86ff; background: rgba(47,134,255,0.14); }
+        .score-team.active-defense { border-color: #dc3545; background: rgba(220,53,69,0.14); }
+        #score-nameA, #score-nameB { text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+        .phase-label { font-size: clamp(13px, 3.6vw, 17px); font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; min-height: 1.1em; }
+        .phase-label.attack { color: #5b9bff; }
+        .phase-label.defense { color: #ff6b6b; }
+
+        #setup-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 150; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; gap: 20px; }
+        #setup-overlay h1 { color: #fff; font-size: clamp(38px, 11vw, 54px); font-weight: 900; text-shadow: 0 0 24px rgba(255,204,0,0.5); letter-spacing: 1px; margin-bottom: 14px; line-height: 1.2; }
+        #mode-buttons { display: flex; flex-direction: column; gap: 20px; width: 90vw; max-width: 340px; }
+        #name-inputs { display: flex; flex-direction: column; gap: 20px; width: 90vw; max-width: 340px; align-items: center; }
+        #name-fields-2p, #name-fields-cpu { display: flex; flex-direction: column; gap: 18px; width: 100%; }
+        #name-inputs input { padding: 22px; font-size: clamp(20px, 5.5vw, 26px); font-weight: 700; border-radius: 14px; border: 2px solid #ffcc0055; background: #14251a; color: #fff; text-align: center; }
+        #actions-field label { display: block; color: #ffcc00; font-size: clamp(16px, 4.5vw, 20px); font-weight: 700; margin-bottom: 8px; }
+        #name-fields-2p, #name-fields-cpu { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+        #name-inputs input { padding: 20px; font-size: 22px; font-weight: 700; border-radius: 12px; border: 2px solid #ffcc0055; background: #14251a; color: #fff; text-align: center; }
+        #name-inputs input::placeholder { color: #7a8f80; }
+        .menu-btn { padding: 28px; border: none; border-radius: 16px; font-size: clamp(22px, 6.5vw, 28px); font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.25s ease; }
+        .menu-btn.primary { background: linear-gradient(180deg,#ffdd55,#ffb700); color: #1a1200; box-shadow: 0 6px 0 #8a6a00, 0 10px 16px rgba(0,0,0,0.4); }
+        .menu-btn.secondary { background: transparent; color: #ffcc00; border: 2px solid #ffcc00; }
+
+        .menu-btn.neutral { background: transparent; color: #ffcc00; border: 2px solid #ffcc00; }
+        .menu-btn.mode-selected { background: linear-gradient(180deg,#ffdd55,#ffb700); color: #1a1200; border: 2px solid transparent; box-shadow: 0 6px 0 #8a6a00, 0 10px 16px rgba(0,0,0,0.4); transform: scale(1.03); }
+        .menu-btn.mode-unselected { background: transparent; color: #556056; border: 2px solid #445048; box-shadow: none; opacity: 0.6; }
+
+
+        #final-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 160; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; gap: 24px; }
+        #final-result-label { color: #fff; font-size: 30px; font-weight: 900; text-shadow: 0 0 20px rgba(255,204,0,0.5); letter-spacing: 1px; }
+        #final-teams { display: flex; align-items: center; gap: 14px; }
+        #final-teams span:not(.score-box) { font-size: 18px; font-weight: 700; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #final-score { font-size: 26px; padding: 6px 16px; }
+        #final-buttons { display: flex; flex-direction: column; gap: 14px; width: 240px; }
+
+        #final-penalty-note { color: #ffcc00; font-size: 17px; font-weight: 700; margin-top: -12px; }
+        #penalty-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 170; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; gap: 14px; overflow: hidden; }
+        #pen-result-header { color: #fff; font-size: 24px; font-weight: 800; text-align: center; margin-top: 4px; line-height: 1.3; }
+        #pen-table { border-collapse: collapse; width: 98vw; max-width: 700px; margin: 0 auto; font-size: clamp(20px, 5.2vw, 26px); color: #eee; font-weight: 700; text-transform: uppercase; table-layout: fixed; }
+        #pen-table th, #pen-table td { border: 1px solid #345; padding: 18px 2px; text-align: center; }
+        #pen-table th { background: #14251a; color: #ffcc00; font-size: clamp(18px, 4.6vw, 23px); font-weight: 900; }
+        #pen-table th:first-child, #pen-table td:first-child { font-size: clamp(14px, 3.6vw, 18px); font-weight: 900; width: 22%; }
+        .pen-check { color: #2ecc71; font-weight: 900; font-size: clamp(22px, 6vw, 30px); }
+        .pen-cross { color: #e74c3c; font-weight: 900; font-size: clamp(22px, 6vw, 30px); }
+        #pen-score-live-wrap { color: #ffcc00; font-weight: 800; font-size: clamp(22px, 6vw, 28px); text-transform: uppercase; }
+
+        .pen-role-label { font-size: clamp(12px, 3vw, 15px); font-weight: 900; letter-spacing: 0.5px; }
+        .pen-role-label.tira { color: #5b9bff; }
+        .pen-role-label.para { color: #ff6b6b; }
+
+        #pen-ready-screen { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 14px; }
+        #pen-turn-team { color: #fff; font-size: 28px; font-weight: 900; }
+        #pen-turn-role { color: #ffcc00; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
+        #pen-goal { width: 98vw; max-width: 900px; aspect-ratio: 400/240; margin: 6px auto 0; }
+        #pen-goal svg { width: 100%; height: 100%; display: block; overflow: visible; }
+        .pen-square { cursor: pointer; transform-box: fill-box; transform-origin: center; transition: transform 0.25s ease; }
+        .pen-square rect { fill: rgba(255,255,255,0.14); stroke: rgba(255,255,255,0.5); stroke-width: 2.5; transition: all 0.25s ease; }
+        .pen-square text { fill: #fff; font-size: 32px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-family: -apple-system, sans-serif; }
+        .pen-square.disabled { opacity: 0.3; pointer-events: none; }
+        .pen-square.highlight-immediate rect { fill: rgba(255,255,255,0.5); stroke: #fff; stroke-width: 3; filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); }
+        .pen-square.highlight-defense rect { fill: rgba(220,53,69,0.9); stroke: #dc3545; }
+        .pen-square.highlight-goal rect { fill: rgba(46,204,113,0.9); stroke: #2ecc71; }
+        .pen-square.highlight-immediate, .pen-square.highlight-defense, .pen-square.highlight-goal { transform: scale(1.12); }
+
+
+
+        /* Ridotto il padding per dare massimo spazio al campo */
+      #pitch-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 6px 6px; background-color: #222; position: relative; }
+
+
+        /* Il campo ora si espande per riempire il massimo spazio disponibile */
+       #pitch { height: 100%; width: auto; max-width: 100%; aspect-ratio: 400 / 670; position: relative; }
+
+        #pitch svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+        /* Nodi (pallini 2-11) */
+        .node, .goal-node { cursor: pointer; transform-box: fill-box; transform-origin: center; transition: transform 0.25s ease, opacity 0.25s ease; }
+        .node circle { fill: #fff; stroke: #111; stroke-width: 3; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)); transition: all 0.25s ease; }
+        .node text { fill: #111; font-size: 17px; font-weight: 900; pointer-events: none; font-family: -apple-system, sans-serif; }
+
+        .node.disabled, .goal-node.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
+
+        .node.highlight-turn circle { stroke: #fff; stroke-width: 4; filter: drop-shadow(0 0 10px rgba(255,255,255,0.9)); }
+        .goal-node.highlight-turn rect { fill: rgba(255, 204, 0, 0.45); }
+
+        .node.highlight-immediate circle { fill: #fff; stroke: #fff; stroke-width: 5; filter: drop-shadow(0 0 16px rgba(255,255,255,1)); }
+        .goal-node.highlight-immediate rect { fill: rgba(255, 255, 255, 0.9); }
+
+        .node.highlight-attack circle { fill: #fff; stroke: #007bff; stroke-width: 5; filter: drop-shadow(0 0 16px rgba(0,123,255,1)); }
+        .goal-node.highlight-attack rect { fill: rgba(0, 123, 255, 0.8); }
+
+        .node.highlight-defense circle { fill: #fff; stroke: #dc3545; stroke-width: 5; filter: drop-shadow(0 0 16px rgba(220,53,69,1)); }
+        .goal-node.highlight-defense rect { fill: rgba(220, 53, 69, 0.8); }
+
+        .node.highlight-clash circle { fill: #ffcc00; stroke: #ffcc00; filter: drop-shadow(0 0 22px rgba(255,204,0,1)); }
+        .node.highlight-clash text { fill: #000; }
+        .goal-node.highlight-clash rect { fill: rgba(255, 204, 0, 0.95); }
+        .goal-node.highlight-clash text { fill: #000; }
+
+        .node.highlight-turn, .goal-node.highlight-turn { transform: scale(1.1); }
+        .node.highlight-immediate, .goal-node.highlight-immediate { transform: scale(1.15); }
+        .node.highlight-attack, .node.highlight-defense { transform: scale(1.2); }
+        .node.highlight-clash, .goal-node.highlight-clash { transform: scale(1.35); }
+
+        .goal-node rect { fill: rgba(255,255,255,0.12); stroke: rgba(255,255,255,0.4); stroke-width: 1.5; transition: all 0.25s ease; }
+        /* Font size delle lettere A B C aumentato per visibilità */
+        .goal-node text { fill: #ffcc00; font-size: 18px; font-weight: 900; pointer-events: none; font-family: -apple-system, sans-serif; }
+
+        #commentary-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #fff; padding: 15px 25px; font-size: 20px; font-weight: bold; border-radius: 10px; border: 3px solid #ffcc00; z-index: 200; text-align: center; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; width: 80%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        #commentary-banner.visible { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        #controls { background: #000; padding: 20px 15px; display: flex; flex-direction: column; gap: 16px; z-index: 10; border-top: 2px solid #333; }
+        #sequence-display { font-size: clamp(18px, 5vw, 24px); text-align: center; min-height: 30px; color: #ffcc00; font-weight: bold; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn { flex-grow: 1; padding: 22px; font-size: clamp(20px, 5.5vw, 26px); border-radius: 12px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-confirm { background-color: #007bff; color: white; box-shadow: 0 5px 0 #0056b3; }
+        .btn-cancel { background-color: #dc3545; color: white; flex-grow: 0; padding: 22px 30px; box-shadow: 0 5px 0 #a52834; }
+
+                #overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; gap: 8px; }
+        #overlay::before { content: "⚽"; font-size: 46px; margin-bottom: 8px; filter: drop-shadow(0 0 16px rgba(255,204,0,0.45)); }
+        #overlay h1 { color: #fff; margin-bottom: 8px; font-size: clamp(42px, 12vw, 64px); font-weight: 900; text-shadow: 0 0 32px rgba(255,204,0,0.6); text-align: center; line-height: 1.1; }
+        #overlay h2 { color: #1a1200; margin-bottom: 14px; margin-top: 10px; font-size: clamp(18px, 5.5vw, 24px); font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; background: #ffcc00; padding: 14px 34px; border-radius: 10px; box-shadow: 0 4px 16px rgba(255,204,0,0.4); }
+        #overlay-desc { color: #bfe0c8; font-size: clamp(20px, 6vw, 28px); max-width: 92vw; line-height: 1.5; margin-bottom: 44px; margin-top: 14px; font-weight: 600; }
+        #btn-start { padding: 30px 70px; font-size: clamp(22px, 7vw, 30px); background: linear-gradient(180deg,#ffdd55,#ffb700); color: #1a1200; border: none; border-radius: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 8px 0 #8a6a00, 0 16px 28px rgba(0,0,0,0.45); }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+
+<div id="setup-overlay">
+    <h1>Soccer Strategy</h1>
+    <div id="mode-buttons">
+        <button class="menu-btn neutral" id="mode-btn-2p" onclick="selectMode('2p')">1 vs 1 Locale</button>
+        <button class="menu-btn neutral" id="mode-btn-cpu" onclick="selectMode('cpu')">Contro CPU</button>
+
+
+    </div>
+    <div id="name-inputs" class="hidden">
+        <div id="name-fields-2p" class="hidden">
+            <input type="text" id="input-nameA" placeholder="Nome Squadra 1" maxlength="14">
+            <input type="text" id="input-nameB" placeholder="Nome Squadra 2" maxlength="14">
+        </div>
+        <div id="name-fields-cpu" class="hidden">
+            <input type="text" id="input-nameHuman" placeholder="Nome della tua squadra" maxlength="14">
+        </div>
+        <div id="actions-field">
+            <label for="input-actions">Azioni a testa per tempo (1-5)</label>
+            <input type="number" id="input-actions" min="1" max="5" placeholder="3">
+        </div>
+        <button class="menu-btn primary" onclick="confirmSetup()">Inizia Partita</button>
+
+    </div>
+</div>
+
+<div id="overlay" class="hidden">
+    <h1 id="overlay-team">Squadra A</h1>
+    <h2 id="overlay-role">Fase di ATTACCO</h2>
+    <p id="overlay-desc">Fischio d'inizio! Traccia la tua traiettoria dalla difesa.</p>
+    <button id="btn-start">Inizia Turno</button>
+</div>
+
+<div id="penalty-screen" class="hidden">
+    <div id="pen-result-header"></div>
+    <table id="pen-table"></table>
+    <div id="pen-score-live-wrap">Rigori: <span id="pen-score-live">0 - 0</span></div>
+
+    <div id="pen-ready-screen">
+        <div id="pen-turn-team">Squadra A</div>
+        <div id="pen-turn-role">TIRA IL RIGORE</div>
+        <button class="menu-btn primary" id="pen-ready-btn">Pronto</button>
+    </div>
+
+    <div id="pen-goal" class="hidden">
+    <svg viewBox="0 0 400 240">
+        <defs>
+            <linearGradient id="pen-grass" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2d8a41"/>
+                <stop offset="100%" stop-color="#3ba24e"/>
+            </linearGradient>
+            <filter id="pen-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.4"/>
+            </filter>
+        </defs>
+
+        <rect x="0" y="0" width="400" height="240" fill="#0a1a12"/>
+
+        <polygon points="60,100 340,100 400,240 0,240" fill="url(#pen-grass)"/>
+        <polygon points="60,100 340,100 400,240 0,240" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.3"/>
+
+        <ellipse cx="200" cy="205" rx="34" ry="13" fill="#fff" opacity="0.95"/>
+        <ellipse cx="200" cy="205" rx="34" ry="13" fill="none" stroke="#dcdcdc" stroke-width="1.5"/>
+
+        <g filter="url(#pen-shadow)">
+            <rect x="60" y="6" width="280" height="6" fill="#fff"/>
+            <rect x="60" y="6" width="6" height="96" fill="#fff"/>
+            <rect x="334" y="6" width="6" height="96" fill="#fff"/>
+        </g>
+        <rect x="66" y="12" width="268" height="88" fill="rgba(255,255,255,0.07)"/>
+
+        <g stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
+            <line x1="155.33" y1="12" x2="155.33" y2="100"/>
+            <line x1="244.67" y1="12" x2="244.67" y2="100"/>
+            <line x1="66" y1="56" x2="334" y2="56"/>
+        </g>
+
+        <g class="pen-square" data-val="1"><rect x="66" y="12" width="89.33" height="44"/><text x="110.67" y="34">1</text></g>
+        <g class="pen-square" data-val="2"><rect x="155.33" y="12" width="89.33" height="44"/><text x="200" y="34">2</text></g>
+        <g class="pen-square" data-val="3"><rect x="244.67" y="12" width="89.33" height="44"/><text x="289.33" y="34">3</text></g>
+        <g class="pen-square" data-val="4"><rect x="66" y="56" width="89.33" height="44"/><text x="110.67" y="78">4</text></g>
+        <g class="pen-square" data-val="5"><rect x="155.33" y="56" width="89.33" height="44"/><text x="200" y="78">5</text></g>
+        <g class="pen-square" data-val="6"><rect x="244.67" y="56" width="89.33" height="44"/><text x="289.33" y="78">6</text></g>
+    </svg>
+</div>
+</div>
+
+
+<div id="final-overlay" class="hidden">
+    <div id="final-result-label">PAREGGIO</div>
+        <div id="final-teams">
+        <span id="final-nameA">Squadra A</span>
+        <span id="final-score" class="score-box">0 - 0</span>
+        <span id="final-nameB">Squadra B</span>
+    </div>
+    <div id="final-penalty-note" class="hidden"></div>
+
+    <div id="final-buttons">
+        <button class="menu-btn primary hidden" id="btn-penalties" onclick="goToPenalties()">Vai ai Rigori</button>
+        <button class="menu-btn secondary" onclick="backToMenu()">Torna al Menu</button>
+    </div>
+</div>
+
+<div id="scoreboard">
+    <span id="sb-half">Tempo 1</span>
+    <span id="sb-actions">Azioni: 3 - 3</span>
+</div>
+
+<div id="score-row">
+    <div class="score-team" id="score-teamA">
+        <span id="score-nameA">Squadra A</span>
+        <span id="score-phaseA" class="phase-label"></span>
+    </div>
+    <span id="score-value" class="score-box">0 - 0</span>
+    <div class="score-team" id="score-teamB">
+        <span id="score-nameB">Squadra B</span>
+        <span id="score-phaseB" class="phase-label"></span>
+    </div>
+</div>
+
+<div id="pitch-container">
+    <div id="commentary-banner"></div>
+    <div id="pitch">
+        <!-- Viewbox esteso verticalmente per fare spazio alle porte più grandi -->
+        <svg viewBox="0 -35 400 670">
+            <defs>
+                <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3ba24e"/>
+                    <stop offset="100%" stop-color="#2d8a41"/>
+                </linearGradient>
+                <filter id="dshadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+                </filter>
+            </defs>
+
+            <!-- Sfondo del prato -->
+            <rect x="0" y="-35" width="400" height="670" fill="url(#grass)"/>
+            
+            <!-- Strisce del prato (solo all'interno delle linee di campo 20-580) -->
+            <rect x="20" y="20" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="76" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="132" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="188" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="244" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="300" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="356" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="412" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="468" width="360" height="28" fill="#fff" opacity="0.05"/>
+            <rect x="20" y="524" width="360" height="28" fill="#fff" opacity="0.05"/>
+
+            <g stroke="#fff" stroke-width="2.5" fill="none" opacity="0.95" filter="url(#dshadow)">
+                <rect x="20" y="20" width="360" height="560"/>
+                <line x1="20" y1="300" x2="380" y2="300"/>
+                <circle cx="200" cy="300" r="45"/>
+                <rect x="115" y="20" width="170" height="65"/>
+                <rect x="115" y="515" width="170" height="65"/>
+                <rect x="150" y="20" width="100" height="25"/>
+                <rect x="150" y="555" width="100" height="25"/>
+                <path d="M 165 85 A 42 42 0 0 0 235 85"/>
+                <path d="M 165 515 A 42 42 0 0 1 235 515"/>
+            </g>
+
+            <!-- Porta TOP: Aumentata altezza a 45 (quasi quadrati) -->
+            <g id="goal-top">
+                <g class="goal-node" data-val="A" data-goal="top" onclick="handleNodeClick('A','top')">
+                    <rect x="115" y="-25" width="56.7" height="45"/>
+                    <text x="143.35" y="3" text-anchor="middle">A</text>
+                </g>
+                <g class="goal-node" data-val="B" data-goal="top" onclick="handleNodeClick('B','top')">
+                    <rect x="171.7" y="-25" width="56.6" height="45"/>
+                    <text x="200" y="3" text-anchor="middle">B</text>
+                </g>
+                <g class="goal-node" data-val="C" data-goal="top" onclick="handleNodeClick('C','top')">
+                    <rect x="228.3" y="-25" width="56.7" height="45"/>
+                    <text x="256.65" y="3" text-anchor="middle">C</text>
+                </g>
+            </g>
+
+            <!-- Porta BOTTOM: Aumentata altezza a 45 -->
+            <g id="goal-bottom">
+                <g class="goal-node" data-val="A" data-goal="bottom" onclick="handleNodeClick('A','bottom')">
+                    <rect x="115" y="580" width="56.7" height="45"/>
+                    <text x="143.35" y="608" text-anchor="middle">A</text>
+                </g>
+                <g class="goal-node" data-val="B" data-goal="bottom" onclick="handleNodeClick('B','bottom')">
+                    <rect x="171.7" y="580" width="56.6" height="45"/>
+                    <text x="200" y="608" text-anchor="middle">B</text>
+                </g>
+                <g class="goal-node" data-val="C" data-goal="bottom" onclick="handleNodeClick('C','bottom')">
+                    <rect x="228.3" y="580" width="56.7" height="45"/>
+                    <text x="256.65" y="608" text-anchor="middle">C</text>
+                </g>
+            </g>
+
+            <!-- Riga attacco (9,10,11) -->
+            <g class="node" data-val="9" onclick="handleNodeClick('9')">
+                <circle cx="120" cy="130" r="23"/><text x="120" y="136" text-anchor="middle">9</text>
+            </g>
+            <g class="node" data-val="10" onclick="handleNodeClick('10')">
+                <circle cx="200" cy="130" r="23"/><text x="200" y="136" text-anchor="middle">10</text>
+            </g>
+            <g class="node" data-val="11" onclick="handleNodeClick('11')">
+                <circle cx="280" cy="130" r="23"/><text x="280" y="136" text-anchor="middle">11</text>
+            </g>
+
+            <!-- Riga centrocampo (5,6,7,8) -->
+            <g class="node" data-val="5" onclick="handleNodeClick('5')">
+                <circle cx="90" cy="300" r="23"/><text x="90" y="306" text-anchor="middle">5</text>
+            </g>
+            <g class="node" data-val="6" onclick="handleNodeClick('6')">
+                <circle cx="163" cy="300" r="23"/><text x="163" y="306" text-anchor="middle">6</text>
+            </g>
+            <g class="node" data-val="7" onclick="handleNodeClick('7')">
+                <circle cx="236" cy="300" r="23"/><text x="236" y="306" text-anchor="middle">7</text>
+            </g>
+            <g class="node" data-val="8" onclick="handleNodeClick('8')">
+                <circle cx="310" cy="300" r="23"/><text x="310" y="306" text-anchor="middle">8</text>
+            </g>
+
+            <!-- Riga difesa (2,3,4) -->
+            <g class="node" data-val="2" onclick="handleNodeClick('2')">
+                <circle cx="120" cy="470" r="23"/><text x="120" y="476" text-anchor="middle">2</text>
+            </g>
+            <g class="node" data-val="3" onclick="handleNodeClick('3')">
+                <circle cx="200" cy="470" r="23"/><text x="200" y="476" text-anchor="middle">3</text>
+            </g>
+            <g class="node" data-val="4" onclick="handleNodeClick('4')">
+                <circle cx="280" cy="470" r="23"/><text x="280" y="476" text-anchor="middle">4</text>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<div id="controls">
+    <div id="sequence-display">SEQUENZA: [ ]</div>
+    <div class="btn-group">
+        <button class="btn btn-confirm" onclick="confirmAttackSequence()">Conferma Mossa</button>
+        <button class="btn btn-cancel" onclick="clearSequence()">X</button>
+    </div>
+</div>
+
+<script>
+    let scoreA = 0, scoreB = 0;
+    let actionsPerHalf = 3;
+    let actionsA = 3, actionsB = 3;
+    let currentHalf = 1;
+    let firstHalfStarter = 'A'; 
+
+    let gameMode = '2p';
+        let nameA = 'Squadra A';
+        let nameB = 'Squadra B';
+
+        function teamName(t) { return t === 'A' ? nameA : nameB; }
+        function isCPUTeam(t) { return gameMode === 'cpu' && t === 'B'; }
+
+            async function cpuPlayAttack() {
+        document.body.classList.add('resolving');
+        commentaryBanner.innerText = `${teamName(attackingTeam)} sta pensando...`;
+        commentaryBanner.classList.add('visible');
+        await delay(1000 + Math.random() * 1000); // pausa di pensiero 1-2s
+        commentaryBanner.classList.remove('visible');
+        if (gameOver) { document.body.classList.remove('resolving'); return; }
+
+        const layers = getSecurityLayers();
+
+            while (currentSequence.length < 4) {
+                const step = currentSequence.length;
+                const options = layers[step];
+            currentSequence.push(options[Math.floor(Math.random() * options.length)]);
+            }
+        updateSequenceDisplay();
+        document.body.classList.remove('resolving');
+        confirmAttackSequence();
+    }
+
+        async function cpuPlayDefense() {
+        document.body.classList.add('resolving');
+        const defendingTeam = attackingTeam === 'A' ? 'B' : 'A';
+        commentaryBanner.innerText = `${teamName(defendingTeam)} sta pensando...`;
+        commentaryBanner.classList.add('visible');
+        await delay(1000 + Math.random() * 1000); // pausa di pensiero 1-2s
+        commentaryBanner.classList.remove('visible');
+        while (!isAttackerPhase && !gameOver) {
+
+
+            const layers = getSecurityLayers();
+            const options = layers[currentDefenseStep];
+            const guess = options[Math.floor(Math.random() * options.length)];
+            await resolveDefenseStep(guess);
+            if (!isAttackerPhase) await delay(700 + Math.random() * 600);
+        }
+    }
+
+
+        function selectMode(mode) {
+        gameMode = mode;
+        document.getElementById('name-inputs').classList.remove('hidden');
+        document.getElementById('name-fields-2p').classList.toggle('hidden', mode !== '2p');
+        document.getElementById('name-fields-cpu').classList.toggle('hidden', mode !== 'cpu');
+
+        const btn2p = document.getElementById('mode-btn-2p');
+        const btnCpu = document.getElementById('mode-btn-cpu');
+        btn2p.classList.remove('neutral', 'mode-selected', 'mode-unselected');
+        btnCpu.classList.remove('neutral', 'mode-selected', 'mode-unselected');
+        if (mode === '2p') {
+            btn2p.classList.add('mode-selected');
+            btnCpu.classList.add('mode-unselected');
+        } else {
+            btnCpu.classList.add('mode-selected');
+            btn2p.classList.add('mode-unselected');
+        }
+    }
+
+
+    function showFinalScreen() {
+        document.body.classList.remove('resolving');
+        document.getElementById('pitch-container').classList.add('hidden');
+        controls.classList.add('hidden');
+        overlay.classList.add('hidden');
+
+        document.getElementById('final-nameA').innerText = nameA;
+        document.getElementById('final-nameB').innerText = nameB;
+         document.getElementById('final-score').innerText = `${scoreA} - ${scoreB}`;
+        document.getElementById('final-penalty-note').classList.add('hidden');
+
+
+        const penaltyBtn = document.getElementById('btn-penalties');
+        if (scoreA === scoreB) {
+            document.getElementById('final-result-label').innerText = 'PAREGGIO';
+            penaltyBtn.classList.remove('hidden');
+        } else {
+            const winner = scoreA > scoreB ? nameA : nameB;
+            document.getElementById('final-result-label').innerText = winner.toUpperCase() + ' VINCE!';
+            penaltyBtn.classList.add('hidden');
+        }
+
+        document.getElementById('final-overlay').classList.remove('hidden');
+    }
+
+    function goToPenalties() {
+        document.getElementById('final-overlay').classList.add('hidden');
+
+        penFirstTeam = Math.random() < 0.5 ? 'A' : 'B';
+        penHistoryA = [];
+        penHistoryB = [];
+        penScoreA = 0;
+        penScoreB = 0;
+        penRound = 1;
+
+        document.getElementById('pen-result-header').innerText = `${nameA} ${scoreA} - ${scoreB} ${nameB} — Si va ai rigori!`;
+        document.getElementById('penalty-screen').classList.remove('hidden');
+        renderPenaltyTable();
+        runPenaltyShootout();
+    }
+
+    function penSquareOptions() { return ['1','2','3','4','5','6']; }
+
+    async function penCPUPick() {
+        await delay(1000 + Math.random() * 1000);
+        const opts = penSquareOptions();
+        return opts[Math.floor(Math.random() * opts.length)];
+    }
+
+    function penHumanPick(team, roleLabel) {
+        return new Promise(resolve => {
+            document.getElementById('pen-turn-team').innerText = teamName(team);
+            document.getElementById('pen-turn-role').innerText = roleLabel;
+            document.getElementById('pen-ready-screen').classList.remove('hidden');
+            document.getElementById('pen-goal').classList.add('hidden');
+            document.getElementById('pen-ready-btn').onclick = () => {
+                document.getElementById('pen-ready-screen').classList.add('hidden');
+                document.getElementById('pen-goal').classList.remove('hidden');
+                document.querySelectorAll('.pen-square').forEach(sq => {
+                    sq.onclick = () => {
+                        document.getElementById('pen-goal').classList.add('hidden');
+                        resolve(sq.dataset.val);
+                    };
+                });
+            };
+        });
+    }
+
+    async function penGetPick(team, roleLabel) {
+        if (isCPUTeam(team)) return penCPUPick();
+        return penHumanPick(team, roleLabel);
+    }
+
+    async function takeKick(shooter) {
+        const keeperTeam = shooter === 'A' ? 'B' : 'A';
+
+        penActiveTeam = shooter; penActiveRole = 'tira';
+        renderPenaltyTable();
+        const shot = await penGetPick(shooter, 'TIRA IL RIGORE');
+
+        penActiveTeam = keeperTeam; penActiveRole = 'para';
+        renderPenaltyTable();
+        const save = await penGetPick(keeperTeam, 'PARA IL RIGORE');
+
+        penActiveTeam = null; penActiveRole = null;
+        renderPenaltyTable();
+
+        document.getElementById('pen-goal').classList.remove('hidden');
+        document.querySelectorAll('.pen-square').forEach(sq => sq.classList.add('disabled'));
+
+        const saveSq = document.querySelector(`.pen-square[data-val="${save}"]`);
+        saveSq.classList.remove('disabled');
+        saveSq.classList.add('highlight-immediate');
+
+        await delay(2000);
+
+        const isSave = (shot === save);
+        saveSq.classList.remove('highlight-immediate');
+        saveSq.classList.add('disabled');
+
+        const shotSq = document.querySelector(`.pen-square[data-val="${shot}"]`);
+        shotSq.classList.remove('disabled');
+
+        if (isSave) {
+            shotSq.classList.add('highlight-defense');
+            commentaryBanner.innerText = 'PARATO!';
+        } else {
+            shotSq.classList.add('highlight-goal');
+            commentaryBanner.innerText = 'GOL!';
+        }
+        commentaryBanner.classList.add('visible');
+        await delay(1800);
+        commentaryBanner.classList.remove('visible');
+        document.querySelectorAll('.pen-square').forEach(sq => sq.classList.remove('disabled', 'highlight-immediate', 'highlight-defense', 'highlight-goal'));
+        document.getElementById('pen-goal').classList.add('hidden');
+
+        const result = isSave ? 'miss' : 'goal';
+        if (shooter === 'A') {
+            penHistoryA.push(result);
+            if (!isSave) penScoreA++;
+        } else {
+            penHistoryB.push(result);
+            if (!isSave) penScoreB++;
+        }
+
+        renderPenaltyTable();
+    }
+
+
+    function penCheckDecision() {
+        if (penRound <= 5) {
+            const remA = 5 - penHistoryA.length;
+            const remB = 5 - penHistoryB.length;
+            if (penScoreA > penScoreB + remB) return 'A';
+            if (penScoreB > penScoreA + remA) return 'B';
+            return null;
+        } else {
+            if (penHistoryA.length === penHistoryB.length && penScoreA !== penScoreB) {
+                return penScoreA > penScoreB ? 'A' : 'B';
+            }
+            return null;
+        }
+    }
+
+    async function runPenaltyShootout() {
+        while (true) {
+            const first = penFirstTeam;
+            const second = first === 'A' ? 'B' : 'A';
+
+            await takeKick(first);
+            let winner = penCheckDecision();
+            if (winner) { endPenalties(winner); return; }
+
+            await takeKick(second);
+            winner = penCheckDecision();
+            if (winner) { endPenalties(winner); return; }
+
+            penRound++;
+        }
+    }
+
+    function renderPenaltyTable() {
+        const blockStart = Math.floor((penRound - 1) / 5) * 5 + 1;
+        const cols = [0, 1, 2, 3, 4].map(i => blockStart + i);
+
+        let html = '<tr><th>Squadra</th>';
+        cols.forEach(c => html += `<th>${c}</th>`);
+        html += '<th>Gol</th></tr>';
+
+        html += penRowHtml('A', nameA, penHistoryA, blockStart);
+        html += penRowHtml('B', nameB, penHistoryB, blockStart);
+
+        document.getElementById('pen-table').innerHTML = html;
+        document.getElementById('pen-score-live').innerText = `${penScoreA} - ${penScoreB}`;
+    }
+
+    function penRowHtml(teamKey, name, history, blockStart) {
+        let indicator = '';
+        if (penActiveTeam === teamKey) {
+            if (penActiveRole === 'tira') indicator = '<br><span class="pen-role-label tira">TIRA</span>';
+            else if (penActiveRole === 'para') indicator = '<br><span class="pen-role-label para">PARA</span>';
+        }
+        let row = `<tr><td>${name}${indicator}</td>`;
+        for (let i = 0; i < 5; i++) {
+            const idx = blockStart - 1 + i;
+            const val = history[idx];
+            let cell = '';
+            if (val === 'goal') cell = '<span class="pen-check">&#10003;</span>';
+            else if (val === 'miss') cell = '<span class="pen-cross">&#10007;</span>';
+            row += `<td>${cell}</td>`;
+        }
+        const goals = history.filter(v => v === 'goal').length;
+        row += `<td>${goals}</td></tr>`;
+        return row;
+    }
+
+        function endPenalties(winnerTeam) {
+        document.getElementById('penalty-screen').classList.add('hidden');
+        document.getElementById('final-result-label').innerText = teamName(winnerTeam).toUpperCase() + ' VINCE AI RIGORI!';
+        document.getElementById('final-penalty-note').innerText = `Risultato: ${scoreA} - ${scoreB}  (rigori ${penScoreA} - ${penScoreB})`;
+        document.getElementById('final-penalty-note').classList.remove('hidden');
+        document.getElementById('btn-penalties').classList.add('hidden');
+        document.getElementById('final-overlay').classList.remove('hidden');
+    }
+
+
+
+    function backToMenu() {
+        document.getElementById('final-overlay').classList.add('hidden');
+        document.getElementById('pitch-container').classList.remove('hidden');
+
+        scoreA = 0; scoreB = 0;
+        actionsA = actionsPerHalf; actionsB = actionsPerHalf;
+        currentHalf = 1;
+        attackingTeam = 'A';
+        firstHalfStarter = 'A';
+        isAttackerPhase = true;
+        sequenceAttack = [];
+        currentSequence = [];
+        currentDefenseStep = 0;
+        nextAttackStartStep = 0;
+        excludedMidfieldNode = null;
+        gameOver = false;
+        penHistoryA = [];
+        penHistoryB = [];
+        penScoreA = 0;
+        penScoreB = 0;
+        penRound = 1;
+updateSequenceDisplay();
+
+        document.getElementById('input-nameA').value = '';
+        document.getElementById('input-nameB').value = '';
+        document.getElementById('input-nameHuman').value = '';
+        document.getElementById('input-actions').value = '';
+        document.getElementById('name-inputs').classList.add('hidden');
+        document.getElementById('name-fields-2p').classList.add('hidden');
+        document.getElementById('name-fields-cpu').classList.add('hidden');
+
+        document.getElementById('setup-overlay').classList.remove('hidden');
+    }
+
+        function confirmSetup() {
+        if (gameMode === '2p') {
+            const a = document.getElementById('input-nameA').value.trim();
+            const b = document.getElementById('input-nameB').value.trim();
+            nameA = a || 'Squadra A';
+            nameB = b || 'Squadra B';
+        } else {
+            const h = document.getElementById('input-nameHuman').value.trim();
+            nameA = h || 'Squadra A';
+            nameB = 'CPU';
+        }
+
+        let chosenActions = parseInt(document.getElementById('input-actions').value, 10);
+        if (isNaN(chosenActions) || chosenActions < 1 || chosenActions > 5) chosenActions = 3;
+        actionsPerHalf = chosenActions;
+        actionsA = actionsPerHalf;
+        actionsB = actionsPerHalf;
+
+        document.getElementById('setup-overlay').classList.add('hidden');
+        updateScoreboard();
+        overlayTeam.innerText = teamName(attackingTeam);
+        overlayRole.innerText = "Fase di ATTACCO";
+        overlayDesc.innerText = "Fischio d'inizio! Traccia la tua traiettoria dalla difesa.";
+        overlay.classList.remove('hidden');
+    }
+
+
+    let attackingTeam = 'A';
+
+    let isAttackerPhase = true;
+    let sequenceAttack = [];
+    let currentSequence = [];
+    let currentDefenseStep = 0;
+    let nextAttackStartStep = 0; 
+    let excludedMidfieldNode = null;
+    let gameOver = false;
+
+    let penFirstTeam = 'A';
+    let penHistoryA = [];
+    let penHistoryB = [];
+    let penScoreA = 0;
+    let penScoreB = 0;
+    let penRound = 1;
+    let penActiveTeam = null;
+    let penActiveRole = null;
+
+    const overlay = document.getElementById('overlay');
+    const overlayTeam = document.getElementById('overlay-team');
+    const overlayRole = document.getElementById('overlay-role');
+    const overlayDesc = document.getElementById('overlay-desc');
+    const sequenceDisplay = document.getElementById('sequence-display');
+    const controls = document.getElementById('controls');
+    const commentaryBanner = document.getElementById('commentary-banner');
+
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+        overlay.classList.add('hidden');
+        if (isAttackerPhase) {
+            if (isCPUTeam(attackingTeam)) {
+                controls.classList.add('hidden');
+                cpuPlayAttack();
+            } else {
+                controls.classList.remove('hidden');
+                updateSecurity();
+            }
+        } else {
+            controls.classList.add('hidden');
+            const defendingTeam = attackingTeam === 'A' ? 'B' : 'A';
+            if (isCPUTeam(defendingTeam)) {
+                cpuPlayDefense();
+            } else {
+                updateSecurity();
+            }
+        }
+    });
+
+
+    function getSecurityLayers() {
+        let layers = (attackingTeam === 'A') ? [['2', '3', '4'], ['5', '6', '7', '8'], ['9', '10', '11'], ['A', 'B', 'C']] : [['9', '10', '11'], ['5', '6', '7', '8'], ['2', '3', '4'], ['A', 'B', 'C']];
+        
+        if (nextAttackStartStep === 1 && excludedMidfieldNode) {
+            layers[1] = layers[1].filter(n => n !== excludedMidfieldNode);
+        }
+        
+        return layers;
+    }
+
+    function findNodeEl(val, step) {
+        if (step === 3) {
+            const goalPos = attackingTeam === 'A' ? 'top' : 'bottom';
+            return document.querySelector(`.goal-node[data-val="${val}"][data-goal="${goalPos}"]`);
+        }
+        return document.querySelector(`.node[data-val="${val}"]`);
+    }
+
+    function updateScoreboard() {
+        document.getElementById('sb-half').innerText = `Tempo ${currentHalf}`;
+        document.getElementById('sb-actions').innerText = `Azioni: ${actionsA} - ${actionsB}`;
+        document.getElementById('score-nameA').innerText = nameA;
+        document.getElementById('score-nameB').innerText = nameB;
+        document.getElementById('score-value').innerText = `${scoreA} - ${scoreB}`;
+        updateTurnIndicator();
+    }
+
+    function updateTurnIndicator() {
+        const teamA = document.getElementById('score-teamA');
+        const teamB = document.getElementById('score-teamB');
+        const phaseA = document.getElementById('score-phaseA');
+        const phaseB = document.getElementById('score-phaseB');
+
+        teamA.classList.remove('active-attack', 'active-defense');
+        teamB.classList.remove('active-attack', 'active-defense');
+        phaseA.textContent = ''; phaseA.classList.remove('attack', 'defense');
+        phaseB.textContent = ''; phaseB.classList.remove('attack', 'defense');
+
+        const movingTeam = isAttackerPhase ? attackingTeam : (attackingTeam === 'A' ? 'B' : 'A');
+        const label = isAttackerPhase ? 'Fase di attacco' : 'Fase di difesa';
+        const cssClass = isAttackerPhase ? 'attack' : 'defense';
+        const activeClass = isAttackerPhase ? 'active-attack' : 'active-defense';
+
+        const phaseEl = movingTeam === 'A' ? phaseA : phaseB;
+        const teamEl = movingTeam === 'A' ? teamA : teamB;
+
+        phaseEl.textContent = label;
+        phaseEl.classList.add(cssClass);
+        teamEl.classList.add(activeClass);
+    }
+
+    function handleNodeClick(value, position = null) {
+        if (isAttackerPhase) {
+            if (currentSequence.length === 3) {
+                if (attackingTeam === 'A' && position !== 'top') return;
+                if (attackingTeam === 'B' && position !== 'bottom') return;
+            }
+            if (currentSequence.length < 4) {
+                currentSequence.push(value);
+                updateSequenceDisplay();
+                updateSecurity();
+            }
+        } else {
+            const expectedPosition = (attackingTeam === 'A') ? 'top' : 'bottom';
+            if (currentDefenseStep === 3 && position !== expectedPosition) return;
+            resolveDefenseStep(value);
+        }
+    }
+
+    function clearSequence() {
+        currentSequence = [];
+        for(let i=0; i < nextAttackStartStep; i++) currentSequence.push('SKIP');
+        updateSequenceDisplay();
+        updateSecurity();
+    }
+
+    function updateSequenceDisplay() {
+        const visibleSeq = currentSequence.filter(v => v !== 'SKIP');
+        let prefix = "";
+        if (nextAttackStartStep === 1) prefix = "[Da Centrocampo] ➔ ";
+        if (nextAttackStartStep === 3) prefix = "[Tiro Diretto] ➔ ";
+
+        sequenceDisplay.innerText = "SEQUENZA: " + prefix + (visibleSeq.length > 0 ? visibleSeq.join(" ➔ ") : "[ ]");
+    }
+
+    function updateSecurity() {
+        const allNodes = document.querySelectorAll('.node, .goal-node');
+        const layers = getSecurityLayers();
+        const stepToCheck = isAttackerPhase ? currentSequence.length : currentDefenseStep;
+        const allowedValues = stepToCheck < 4 ? layers[stepToCheck] : [];
+
+        allNodes.forEach(n => {
+            n.classList.add('disabled');
+            n.classList.remove('highlight-turn');
+        });
+
+        if (stepToCheck < 3) {
+            document.querySelectorAll('.node').forEach(n => {
+                if (allowedValues.includes(n.dataset.val)) {
+                    n.classList.remove('disabled'); n.classList.add('highlight-turn');
+                }
+            });
+        } else if (stepToCheck === 3) {
+            const targetGoals = attackingTeam === 'A' ? document.querySelectorAll('#goal-top .goal-node') : document.querySelectorAll('#goal-bottom .goal-node');
+            targetGoals.forEach(n => {
+                n.classList.remove('disabled'); n.classList.add('highlight-turn');
+            });
+        }
+    }
+
+    function confirmAttackSequence() {
+        if (currentSequence.length < 4) { alert("Completa la sequenza fino alla porta!"); return; }
+
+        sequenceAttack = [...currentSequence];
+
+        isAttackerPhase = false;
+        currentDefenseStep = nextAttackStartStep;
+        updateTurnIndicator();
+
+        overlayTeam.innerText = teamName(attackingTeam === 'A' ? 'B' : 'A');
+
+        overlayRole.innerText = "Fase di DIFESA";
+        overlayDesc.innerText = "L'avversario ha impostato l'azione. Cerca di intercettarlo.";
+
+        document.querySelectorAll('.node, .goal-node').forEach(n => {
+            n.classList.remove('highlight-turn'); n.classList.add('disabled');
+        });
+
+        overlay.classList.remove('hidden');
+    }
+
+    async function resolveDefenseStep(guessValue) {
+        document.body.classList.add('resolving');
+
+        const nodeD = findNodeEl(guessValue, currentDefenseStep);
+        const actualValue = sequenceAttack[currentDefenseStep];
+        const nodeA = findNodeEl(actualValue, currentDefenseStep);
+
+        document.querySelectorAll('.node, .goal-node').forEach(n => n.classList.remove('highlight-turn'));
+
+        nodeD.classList.remove('disabled');
+        nodeD.classList.add('highlight-immediate');
+
+        await delay(2000);
+
+        if (guessValue === actualValue) {
+            nodeD.classList.remove('highlight-immediate'); 
+            nodeD.classList.add('highlight-clash');
+
+            await delay(1000);
+
+            commentaryBanner.innerText = (currentDefenseStep === 3) ? "PARATA!" : "INTERCETTATO!";
+            commentaryBanner.classList.add('visible');
+            await delay(2500);
+
+            if (currentDefenseStep === 0) { nextAttackStartStep = 3; excludedMidfieldNode = null; }
+            else if (currentDefenseStep === 1) { nextAttackStartStep = 1; excludedMidfieldNode = guessValue; } 
+            else if (currentDefenseStep === 2) { nextAttackStartStep = 1; excludedMidfieldNode = null; }
+            else if (currentDefenseStep === 3) { nextAttackStartStep = 0; excludedMidfieldNode = null; }
+
+            endAction(false);
+
+        } else {
+            nodeD.classList.remove('highlight-immediate'); 
+            nodeD.classList.add('highlight-defense');
+
+            nodeA.classList.remove('disabled');
+            nodeA.classList.add('highlight-attack');
+
+            await delay(1000);
+
+            commentaryBanner.innerText = (currentDefenseStep === 3) ? "GOAL!!!" : "L'AZIONE PROSEGUE";
+            commentaryBanner.classList.add('visible');
+            await delay(2000);
+            commentaryBanner.classList.remove('visible');
+            await delay(300);
+
+            if (currentDefenseStep === 3) {
+                nextAttackStartStep = 0;
+                excludedMidfieldNode = null; 
+                endAction(true);
+            } else {
+                nodeD.classList.remove('highlight-defense');
+                nodeD.classList.add('disabled');
+                nodeA.classList.remove('highlight-attack');
+                nodeA.classList.add('disabled');
+
+                currentDefenseStep++;
+                updateSecurity();
+                document.body.classList.remove('resolving');
+            }
+        }
+    }
+
+    function endAction(isGoal) {
+        commentaryBanner.classList.remove('visible');
+        document.querySelectorAll('.node, .goal-node').forEach(n => {
+            n.classList.remove('highlight-attack', 'highlight-defense', 'highlight-clash', 'highlight-immediate');
+        });
+
+        if (attackingTeam === 'A') actionsA--;
+        else actionsB--;
+
+        if (isGoal) {
+            if (attackingTeam === 'A') scoreA++;
+            else scoreB++;
+        }
+
+        let halfEnded = false;
+
+        if (actionsA === 0 && actionsB === 0) {
+            if (currentHalf === 1) {
+                currentHalf = 2;
+                actionsA = actionsPerHalf;
+                actionsB = actionsPerHalf;
+                attackingTeam = (firstHalfStarter === 'A') ? 'B' : 'A';
+                nextAttackStartStep = 0;
+                excludedMidfieldNode = null; 
+                halfEnded = true;
+            } else {
+                gameOver = true;
+                updateScoreboard();
+                showFinalScreen();
+                return;
+            }
+
+        } else {
+            attackingTeam = attackingTeam === 'A' ? 'B' : 'A';
+        }
+
+        updateScoreboard();
+
+        isAttackerPhase = true;
+        updateTurnIndicator();
+        currentSequence = [];
+        for(let i=0; i<nextAttackStartStep; i++) {
+            currentSequence.push('SKIP');
+        }
+        updateSequenceDisplay();
+
+        overlayTeam.innerText = teamName(attackingTeam);
+
+        overlayRole.innerText = "Fase di ATTACCO";
+
+        if (halfEnded) {
+            overlayDesc.innerText = "Inizia il Secondo Tempo! Palla al centro, riparti dalla difesa.";
+        } else if (isGoal) {
+            overlayDesc.innerText = "Hai subito GOAL! Riparti dalla tua difesa per rifarti.";
+        } else {
+            if (nextAttackStartStep === 0) overlayDesc.innerText = "Ottima parata! Rilancia l'azione dalla tua difesa.";
+            else if (nextAttackStartStep === 1) overlayDesc.innerText = "Palla recuperata! Sfrutta il contropiede e riparti da centrocampo.";
+            else if (nextAttackStartStep === 3) overlayDesc.innerText = "Palla rubata in attacco! Sei solo davanti al portiere, devi solo tirare!";
+        }
+
+        document.body.classList.remove('resolving');
+        overlay.classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
