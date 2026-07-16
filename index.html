@@ -877,6 +877,7 @@ updateSequenceDisplay();
         if (nextAttackStartStep === 3) prefix = "[Tiro Diretto] \u2192 ";
 
         sequenceDisplay.innerText = "SEQUENZA: " + prefix + (visibleSeq.length > 0 ? visibleSeq.join(" \u2192 ") : "[ ]");
+}
 
     function updateSecurity() {
         const allNodes = document.querySelectorAll('.node, .goal-node');
