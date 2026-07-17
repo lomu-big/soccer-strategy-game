@@ -265,12 +265,12 @@
     </div>
 </div>
 
-<div id="scoreboard">
+<div id="scoreboard" class="hidden">
     <span id="sb-half">Tempo 1</span>
     <span id="sb-actions">Azioni: 3 - 3</span>
 </div>
 
-<div id="score-row">
+<div id="score-row" class="hidden">
     <div class="score-team" id="score-teamA">
         <span id="score-nameA">Squadra A</span>
         <span id="score-phaseA" class="phase-label"></span>
@@ -282,7 +282,7 @@
     </div>
 </div>
 
-<div id="pitch-container">
+<div id="pitch-container" class="hidden">
     <div id="commentary-banner"></div>
     <div id="pitch">
         <!-- Viewbox esteso verticalmente per fare spazio alle porte piÃ¹ grandi -->
@@ -395,7 +395,7 @@
     </div>
 </div>
 
-<div id="controls">
+<div id="controls" class="hidden">
     <div id="sequence-display">SEQUENZA: [ ]</div>
     <div class="btn-group">
         <button class="btn btn-confirm" onclick="confirmAttackSequence()">Conferma Mossa</button>
@@ -701,7 +701,10 @@
 
     function backToMenu() {
         document.getElementById('final-overlay').classList.add('hidden');
-        document.getElementById('pitch-container').classList.remove('hidden');
+        document.getElementById('scoreboard').classList.add('hidden');
+        document.getElementById('score-row').classList.add('hidden');
+        document.getElementById('pitch-container').classList.add('hidden');
+        document.getElementById('controls').classList.add('hidden');
 
         scoreA = 0; scoreB = 0;
         actionsA = actionsPerHalf; actionsB = actionsPerHalf;
@@ -752,6 +755,9 @@ updateSequenceDisplay();
         actionsB = actionsPerHalf;
 
         document.getElementById('setup-overlay').classList.add('hidden');
+        document.getElementById('scoreboard').classList.remove('hidden');
+        document.getElementById('score-row').classList.remove('hidden');
+        document.getElementById('pitch-container').classList.remove('hidden');
         updateScoreboard();
         overlayTeam.innerText = teamName(attackingTeam);
         overlayRole.innerText = "Fase di ATTACCO";
