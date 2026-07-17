@@ -803,6 +803,9 @@ updateSequenceDisplay();
     document.getElementById('btn-start').addEventListener('click', () => {
         setAppHeight();
         overlay.classList.add('hidden');
+        document.getElementById('scoreboard').classList.remove('hidden');
+        document.getElementById('score-row').classList.remove('hidden');
+        document.getElementById('pitch-container').classList.remove('hidden');
 
         if (isAttackerPhase) {
             if (isCPUTeam(attackingTeam)) {
@@ -947,12 +950,16 @@ updateSequenceDisplay();
         overlayTeam.innerText = teamName(attackingTeam === 'A' ? 'B' : 'A');
 
         overlayRole.innerText = "Fase di DIFESA";
+
         overlayDesc.innerText = "L'avversario ha impostato l'azione. Cerca di intercettarlo.";
 
         document.querySelectorAll('.node, .goal-node').forEach(n => {
             n.classList.remove('highlight-turn'); n.classList.add('disabled');
         });
 
+        document.getElementById('scoreboard').classList.add('hidden');
+        document.getElementById('score-row').classList.add('hidden');
+        document.getElementById('pitch-container').classList.add('hidden');
         overlay.classList.remove('hidden');
     }
 
@@ -1078,10 +1085,13 @@ updateSequenceDisplay();
             else if (nextAttackStartStep === 1) overlayDesc.innerText = "Palla recuperata! Sfrutta il contropiede e riparti da centrocampo.";
             else if (nextAttackStartStep === 3) overlayDesc.innerText = "Palla rubata in attacco! Sei solo davanti al portiere, devi solo tirare!";
         }
-
-        document.body.classList.remove('resolving');
+             document.body.classList.remove('resolving');
+        document.getElementById('scoreboard').classList.add('hidden');
+        document.getElementById('score-row').classList.add('hidden');
+        document.getElementById('pitch-container').classList.add('hidden');
         overlay.classList.remove('hidden');
     }
+
 </script>
 </body>
 </html>
