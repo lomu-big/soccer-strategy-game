@@ -36,7 +36,7 @@
         .phase-label.attack { color: #5b9bff; }
         .phase-label.defense { color: #ff6b6b; }
 
-        #setup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100svh; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 150; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 12px); gap: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #setup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: calc(100svh + 40px); background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 150; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 12px); gap: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
         #setup-overlay h1 { color: #fff; font-size: clamp(26px, 7.5vw, 34px); font-weight: 900; text-shadow: 0 0 20px rgba(255,204,0,0.5); letter-spacing: 1px; margin-bottom: 10px; line-height: 1.2; }
 
@@ -58,7 +58,7 @@
         .menu-btn.mode-unselected { background: transparent; color: #556056; border: 2px solid #445048; box-shadow: none; opacity: 0.6; }
 
 
-        #final-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100svh; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 160; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: calc(max(24px, env(safe-area-inset-bottom)) + 28px); gap: 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #final-overlay { position: fixed; top: 0; left: 0; width: 100%; height: calc(100svh + 40px); background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 160; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: calc(max(24px, env(safe-area-inset-bottom)) + 28px); gap: 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
         #final-result-label { color: #fff; font-size: 30px; font-weight: 900; text-shadow: 0 0 20px rgba(255,204,0,0.5); letter-spacing: 1px; }
         #final-teams { display: flex; align-items: center; gap: 14px; }
@@ -68,7 +68,7 @@
 
         #final-penalty-note { color: #ffcc00; font-size: 17px; font-weight: 700; margin-top: -12px; }
 
-        #penalty-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100svh; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 170; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 28px); gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #penalty-screen { position: fixed; top: 0; left: 0; width: 100%; height: calc(100svh + 40px); background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 170; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 28px); gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
         #pen-result-header { color: #fff; font-size: 24px; font-weight: 800; text-align: center; margin-top: 4px; line-height: 1.3; }
 
@@ -154,7 +154,7 @@
         .btn-confirm { background-color: #007bff; color: white; box-shadow: 0 4px 0 #0056b3; }
         .btn-cancel { background-color: #dc3545; color: white; flex-grow: 0; padding: 12px 18px; box-shadow: 0 4px 0 #a52834; }
 
-                #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100svh; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 12px); gap: 6px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+                #overlay { position: fixed; top: 0; left: 0; width: 100%; height: calc(100svh + 40px); background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 12px); gap: 6px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
         #overlay::before { content: "\26BD"; font-size: 30px; margin-bottom: 4px; filter: drop-shadow(0 0 12px rgba(255,204,0,0.45)); }
 
@@ -422,8 +422,52 @@
         window.visualViewport.addEventListener('resize', setAppHeight);
         window.visualViewport.addEventListener('scroll', setAppHeight);
     }
-    setInterval(setAppHeight, 400);
 
+setInterval(setAppHeight, 400);
+
+    let audioCtx = null;
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playTone(freq, duration, type, startTime, volume) {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume || 0.2, ctx.currentTime + startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + startTime);
+        osc.stop(ctx.currentTime + startTime + duration);
+    }
+
+    function playWhistle() {
+        playTone(2200, 0.15, 'sine', 0, 0.25);
+        playTone(2600, 0.25, 'sine', 0.18, 0.25);
+    }
+
+    function playFullTimeWhistle() {
+        playTone(2200, 0.15, 'sine', 0, 0.25);
+        playTone(2200, 0.15, 'sine', 0.25, 0.25);
+        playTone(2200, 0.4, 'sine', 0.5, 0.25);
+    }
+
+    function playGoalSound() {
+        [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.25, 'triangle', i * 0.09, 0.22));
+    }
+
+    function playThudSound() {
+        playTone(140, 0.18, 'square', 0, 0.2);
+    }
+
+    function vibrateGoal() {
+        if (navigator.vibrate) navigator.vibrate([80, 40, 120]);
+    }
 
     let scoreA = 0, scoreB = 0;
 
@@ -499,6 +543,7 @@
 
 
     function showFinalScreen() {
+        playFullTimeWhistle();
         document.body.classList.remove('resolving');
         document.getElementById('pitch-container').classList.add('hidden');
         controls.classList.add('hidden');
@@ -603,9 +648,12 @@
         shotSq.classList.remove('disabled');
 
         if (isSave) {
+            playThudSound();
             shotSq.classList.add('highlight-defense');
             commentaryBanner.innerText = 'PARATO!';
         } else {
+            playGoalSound();
+            vibrateGoal();
             shotSq.classList.add('highlight-goal');
             commentaryBanner.innerText = 'GOL!';
         }
@@ -768,12 +816,12 @@ updateSequenceDisplay();
         setAppHeight();
         updateScoreboard();
 
-        overlayTeam.innerText = teamName(attackingTeam);
+overlayTeam.innerText = teamName(attackingTeam);
         overlayRole.innerText = "Fase di ATTACCO";
         overlayDesc.innerText = "Fischio d'inizio! Traccia la tua traiettoria dalla difesa.";
         overlay.classList.remove('hidden');
+        playWhistle();
     }
-
 
     let attackingTeam = 'A';
 
@@ -987,9 +1035,11 @@ updateSequenceDisplay();
 
             await delay(1000);
 
-            commentaryBanner.innerText = (currentDefenseStep === 3) ? "PARATA!" : "INTERCETTATO!";
+playThudSound();
+commentaryBanner.innerText = (currentDefenseStep === 3) ? "PARATA!" : "INTERCETTATO!";
             commentaryBanner.classList.add('visible');
             await delay(2500);
+
 
             if (currentDefenseStep === 0) { nextAttackStartStep = 3; excludedMidfieldNode = null; }
             else if (currentDefenseStep === 1) { nextAttackStartStep = 1; excludedMidfieldNode = guessValue; } 
@@ -1004,9 +1054,9 @@ updateSequenceDisplay();
 
             nodeA.classList.remove('disabled');
             nodeA.classList.add('highlight-attack');
-
             await delay(1000);
 
+            if (currentDefenseStep === 3) { playGoalSound(); vibrateGoal(); }
             commentaryBanner.innerText = (currentDefenseStep === 3) ? "GOAL!!!" : "L'AZIONE PROSEGUE";
             commentaryBanner.classList.add('visible');
             await delay(2000);
@@ -1051,10 +1101,13 @@ updateSequenceDisplay();
                 currentHalf = 2;
                 actionsA = actionsPerHalf;
                 actionsB = actionsPerHalf;
+
                 attackingTeam = (firstHalfStarter === 'A') ? 'B' : 'A';
                 nextAttackStartStep = 0;
                 excludedMidfieldNode = null; 
                 halfEnded = true;
+                playWhistle();
+
             } else {
                 gameOver = true;
                 updateScoreboard();
