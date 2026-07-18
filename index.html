@@ -168,7 +168,11 @@
         #overlay::before { content: "\26BD"; font-size: 30px; margin-bottom: 4px; filter: drop-shadow(0 0 12px rgba(255,204,0,0.45)); }
 
         #overlay h1 { color: #fff; margin-bottom: 6px; font-size: clamp(28px, 8.5vw, 38px); font-weight: 900; text-shadow: 0 0 22px rgba(255,204,0,0.6); text-align: center; line-height: 1.1; }
-        #overlay h2 { color: #1a1200; margin-bottom: 8px; margin-top: 6px; font-size: clamp(13px, 4vw, 16px); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; background: #ffcc00; padding: 8px 20px; border-radius: 8px; box-shadow: 0 3px 12px rgba(255,204,0,0.4); }
+
+        #overlay h2 { color: #fff; margin-bottom: 8px; margin-top: 6px; font-size: clamp(13px, 4vw, 16px); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; padding: 8px 20px; border-radius: 8px; }
+        #overlay h2.attack { background: #2f86ff; box-shadow: 0 3px 12px rgba(47,134,255,0.4); }
+        #overlay h2.defense { background: #dc3545; box-shadow: 0 3px 12px rgba(220,53,69,0.4); }
+
         #overlay-desc { color: #bfe0c8; font-size: clamp(14px, 4.2vw, 18px); max-width: 90vw; line-height: 1.4; margin-bottom: 20px; margin-top: 8px; font-weight: 600; }
         #btn-start { padding: 16px 40px; font-size: clamp(15px, 4.5vw, 19px); background: linear-gradient(180deg,#ffdd55,#ffb700); color: #1a1200; border: none; border-radius: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 5px 0 #8a6a00, 0 8px 16px rgba(0,0,0,0.45); }
         
@@ -194,12 +198,15 @@
         <div id="name-fields-cpu" class="hidden">
             <input type="text" id="input-nameHuman" placeholder="Nome della tua squadra" maxlength="14">
         </div>
+
         <div id="actions-field">
             <label for="input-actions">Azioni a testa per tempo (1-5)</label>
             <input type="number" id="input-actions" min="1" max="5" placeholder="3">
         </div>
+        <label id="penalty-only-label" style="display:flex;align-items:center;gap:8px;color:#ffcc00;font-weight:700;font-size:clamp(13px,3.6vw,16px);">
+            <input type="checkbox" id="input-penalty-only" onchange="togglePenaltyOnly()"> Solo rigori (salta la partita)
+        </label>
         <button class="menu-btn primary" onclick="confirmSetup()">Inizia Partita</button>
-
     </div>
 </div>
 
@@ -932,7 +939,11 @@ updateSequenceDisplay();
         updateScoreboard();
 
 overlayTeam.innerText = teamName(attackingTeam);
+
         overlayRole.innerText = "Fase di ATTACCO";
+        overlayRole.classList.remove('defense');
+        overlayRole.classList.add('attack');
+
         overlayDesc.innerText = "Fischio d'inizio! Traccia la tua traiettoria dalla difesa.";
         overlay.classList.remove('hidden');
         playWhistle();
@@ -1117,6 +1128,8 @@ overlayTeam.innerText = teamName(attackingTeam);
         overlayTeam.innerText = teamName(attackingTeam === 'A' ? 'B' : 'A');
 
         overlayRole.innerText = "Fase di DIFESA";
+        overlayRole.classList.remove('attack');
+        overlayRole.classList.add('defense');
 
         overlayDesc.innerText = "L'avversario ha impostato l'azione. Cerca di intercettarlo.";
 
