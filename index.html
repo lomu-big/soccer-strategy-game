@@ -88,7 +88,16 @@
         #pen-ready-screen { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 14px; }
         #pen-turn-team { color: #fff; font-size: 28px; font-weight: 900; }
         #pen-turn-role { color: #ffcc00; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
-        #pen-goal { width: 98vw; max-width: 900px; aspect-ratio: 400/240; margin: 6px auto 0; }
+
+        #pen-goal { width: 98vw; max-width: 900px; aspect-ratio: 400/300; margin: 6px auto 0; }
+        #pen-crowd.celebrating { animation: penCrowdCelebrate 0.12s steps(1) infinite; transform-box: fill-box; }
+        @keyframes penCrowdCelebrate {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-3px); }
+            50% { transform: translateY(1.5px); }
+            75% { transform: translateY(-2px); }
+        }
+
         #pen-goal svg { width: 100%; height: 100%; display: block; overflow: visible; }
         .pen-square { cursor: pointer; transform-box: fill-box; transform-origin: center; transition: transform 0.25s ease; }
         .pen-square rect { fill: rgba(255,255,255,0.14); stroke: rgba(255,255,255,0.5); stroke-width: 2.5; transition: all 0.25s ease; }
@@ -213,7 +222,7 @@
     </div>
 
     <div id="pen-goal" class="hidden">
-    <svg viewBox="0 0 400 240">
+    <svg viewBox="0 0 400 300">
         <defs>
             <linearGradient id="pen-grass" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#2d8a41"/>
@@ -224,35 +233,50 @@
             </filter>
         </defs>
 
-        <rect x="0" y="0" width="400" height="240" fill="#0a1a12"/>
+        <rect x="0" y="0" width="400" height="300" fill="#0a1a12"/>
 
-        <polygon points="60,100 340,100 400,240 0,240" fill="url(#pen-grass)"/>
-        <polygon points="60,100 340,100 400,240 0,240" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.3"/>
+        <g id="pen-crowd"></g>
 
-        <ellipse cx="200" cy="205" rx="34" ry="13" fill="#fff" opacity="0.95"/>
-        <ellipse cx="200" cy="205" rx="34" ry="13" fill="none" stroke="#dcdcdc" stroke-width="1.5"/>
+        <rect x="0" y="132" width="400" height="168" fill="url(#pen-grass)"/>
+        <line x1="0" y1="132" x2="400" y2="132" stroke="#fff" stroke-width="2.5" opacity="0.3"/>
+
+        <g id="ad-left">
+            <rect x="0" y="78" width="55" height="36" fill="#ffcc00"/>
+            <rect x="0" y="114" width="55" height="18" fill="url(#pen-grass)"/>
+        </g>
+        <g id="ad-right">
+            <rect x="345" y="78" width="55" height="36" fill="#ffcc00"/>
+            <rect x="345" y="114" width="55" height="18" fill="url(#pen-grass)"/>
+        </g>
+
+        <line x1="10" y1="170" x2="390" y2="170" stroke="#fff" stroke-width="2.5" opacity="0.4"/>
+        <line x1="10" y1="170" x2="40" y2="132" stroke="#fff" stroke-width="2.5" opacity="0.4"/>
+        <line x1="390" y1="170" x2="360" y2="132" stroke="#fff" stroke-width="2.5" opacity="0.4"/>
+
+        <ellipse cx="200" cy="228" rx="26" ry="10" fill="#fff" opacity="0.95"/>
+        <ellipse cx="200" cy="228" rx="26" ry="10" fill="none" stroke="#dcdcdc" stroke-width="2"/>
 
         <g filter="url(#pen-shadow)">
-            <rect x="60" y="6" width="280" height="6" fill="#fff"/>
-            <rect x="60" y="6" width="6" height="96" fill="#fff"/>
-            <rect x="334" y="6" width="6" height="96" fill="#fff"/>
+            <rect x="55" y="42" width="290" height="6" fill="#fff"/>
+            <rect x="55" y="42" width="6" height="90" fill="#fff"/>
+            <rect x="339" y="42" width="6" height="90" fill="#fff"/>
         </g>
-        <rect x="66" y="12" width="268" height="88" fill="rgba(255,255,255,0.07)"/>
+        <rect x="61" y="48" width="278" height="84" fill="rgba(255,255,255,0.07)"/>
 
         <g stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
-            <line x1="155.33" y1="12" x2="155.33" y2="100"/>
-            <line x1="244.67" y1="12" x2="244.67" y2="100"/>
-            <line id="pen-divider-col1" x1="66" y1="56" x2="155.33" y2="56"/>
-            <line id="pen-divider-col2" x1="155.33" y1="56" x2="244.67" y2="56"/>
-            <line id="pen-divider-col3" x1="244.67" y1="56" x2="334" y2="56"/>
+            <line x1="153.67" y1="48" x2="153.67" y2="132"/>
+            <line x1="246.33" y1="48" x2="246.33" y2="132"/>
+            <line id="pen-divider-col1" x1="61" y1="90" x2="153.67" y2="90"/>
+            <line id="pen-divider-col2" x1="153.67" y1="90" x2="246.33" y2="90"/>
+            <line id="pen-divider-col3" x1="246.33" y1="90" x2="339" y2="90"/>
         </g>
 
-        <g class="pen-square" data-val="A"><rect x="66" y="12" width="89.33" height="44"/><text x="110.67" y="34">A</text></g>
-        <g class="pen-square" data-val="B"><rect x="155.33" y="12" width="89.33" height="44"/><text x="200" y="34">B</text></g>
-        <g class="pen-square" data-val="C"><rect x="244.67" y="12" width="89.33" height="44"/><text x="289.33" y="34">C</text></g>
-        <g class="pen-square" data-val="D"><rect x="66" y="56" width="89.33" height="44"/><text x="110.67" y="78">D</text></g>
-        <g class="pen-square" data-val="E"><rect x="155.33" y="56" width="89.33" height="44"/><text x="200" y="78">E</text></g>
-        <g class="pen-square" data-val="F"><rect x="244.67" y="56" width="89.33" height="44"/><text x="289.33" y="78">F</text></g>
+        <g class="pen-square" data-val="A"><rect x="61" y="48" width="92.67" height="42"/><text x="107.33" y="69">A</text></g>
+        <g class="pen-square" data-val="B"><rect x="153.67" y="48" width="92.67" height="42"/><text x="200" y="69">B</text></g>
+        <g class="pen-square" data-val="C"><rect x="246.33" y="48" width="92.67" height="42"/><text x="292.67" y="69">C</text></g>
+        <g class="pen-square" data-val="D"><rect x="61" y="90" width="92.67" height="42"/><text x="107.33" y="111">D</text></g>
+        <g class="pen-square" data-val="E"><rect x="153.67" y="90" width="92.67" height="42"/><text x="200" y="111">E</text></g>
+        <g class="pen-square" data-val="F"><rect x="246.33" y="90" width="92.67" height="42"/><text x="292.67" y="111">F</text></g>
 
     </svg>
 </div>
@@ -571,8 +595,31 @@ setInterval(setAppHeight, 400);
         document.getElementById('final-overlay').classList.remove('hidden');
     }
 
+    function populatePenaltyCrowd() {
+        const crowd = document.getElementById('pen-crowd');
+        if (crowd.childElementCount > 0) return;
+        const colors = ['#c0392b','#2980b9','#f1c40f','#27ae60','#8e44ad','#ecf0f1','#e67e22'];
+        const rows = [5, 14, 23];
+        let html = '';
+        rows.forEach(y => {
+            for (let i = 0; i < 26; i++) {
+                const x = 4 + i * 15.4 + (Math.random() * 4 - 2);
+                const c = colors[Math.floor(Math.random() * colors.length)];
+                html += `<ellipse cx="${x.toFixed(1)}" cy="${y}" rx="5" ry="4" fill="${c}" opacity="0.9"/>`;
+            }
+        });
+        crowd.innerHTML = html;
+    }
+
+    function celebratePenaltyCrowd() {
+        const crowd = document.getElementById('pen-crowd');
+        crowd.classList.add('celebrating');
+        setTimeout(() => crowd.classList.remove('celebrating'), 1800);
+    }
+
     function goToPenalties() {
         document.getElementById('final-overlay').classList.add('hidden');
+        populatePenaltyCrowd();
 
         penFirstTeam = Math.random() < 0.5 ? 'A' : 'B';
         penHistoryA = [];
@@ -594,11 +641,12 @@ setInterval(setAppHeight, 400);
         ['A','B','C','D'],
         ['A','B','C']
     ];
+
     const PEN_TIER_LAYOUT = [
-        { A:{y:12,h:44}, B:{y:12,h:44}, C:{y:12,h:44}, D:{y:56,h:44}, E:{y:56,h:44}, F:{y:56,h:44} },
-        { A:{y:12,h:44}, B:{y:12,h:44}, C:{y:12,h:88}, D:{y:56,h:44}, E:{y:56,h:44} },
-        { A:{y:12,h:44}, B:{y:12,h:88}, C:{y:12,h:88}, D:{y:56,h:44} },
-        { A:{y:12,h:88}, B:{y:12,h:88}, C:{y:12,h:88} }
+        { A:{y:48,h:42}, B:{y:48,h:42}, C:{y:48,h:42}, D:{y:90,h:42}, E:{y:90,h:42}, F:{y:90,h:42} },
+        { A:{y:48,h:42}, B:{y:48,h:42}, C:{y:48,h:84}, D:{y:90,h:42}, E:{y:90,h:42} },
+        { A:{y:48,h:42}, B:{y:48,h:84}, C:{y:48,h:84}, D:{y:90,h:42} },
+        { A:{y:48,h:84}, B:{y:48,h:84}, C:{y:48,h:84} }
     ];
 
     function getPenTier() {
@@ -701,12 +749,15 @@ setInterval(setAppHeight, 400);
             playThudSound();
             shotSq.classList.add('highlight-defense');
             commentaryBanner.innerText = 'PARATO!';
+
         } else {
             playGoalSound();
             vibrateGoal();
+            celebratePenaltyCrowd();
             shotSq.classList.add('highlight-goal');
             commentaryBanner.innerText = 'GOL!';
         }
+
         commentaryBanner.classList.add('visible');
         await delay(1800);
         commentaryBanner.classList.remove('visible');
