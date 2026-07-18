@@ -548,6 +548,10 @@ setInterval(setAppHeight, 400);
         }
     }
 
+        function togglePenaltyOnly() {
+            const checked = document.getElementById('input-penalty-only').checked;
+            document.getElementById('actions-field').classList.toggle('hidden', checked);
+        }
 
         function selectMode(mode) {
         gameMode = mode;
@@ -904,6 +908,14 @@ updateSequenceDisplay();
             const h = document.getElementById('input-nameHuman').value.trim();
             nameA = h || 'Squadra A';
             nameB = 'CPU';
+        }
+
+        if (document.getElementById('input-penalty-only').checked) {
+            document.getElementById('setup-overlay').classList.add('hidden');
+            scoreA = 0;
+            scoreB = 0;
+            goToPenalties();
+            return;
         }
 
         let chosenActions = parseInt(document.getElementById('input-actions').value, 10);
