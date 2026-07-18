@@ -1262,6 +1262,8 @@ commentaryBanner.innerText = (currentDefenseStep === 3) ? "PARATA!" : "INTERCETT
         overlayTeam.innerText = teamName(attackingTeam);
 
         overlayRole.innerText = "Fase di ATTACCO";
+        overlayRole.classList.remove('defense');
+        overlayRole.classList.add('attack');
 
         if (halfEnded) {
             overlayDesc.innerText = "Inizia il Secondo Tempo! Palla al centro, riparti dalla difesa.";
