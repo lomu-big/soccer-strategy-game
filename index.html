@@ -182,6 +182,17 @@
         @media (orientation: landscape) and (max-height: 550px) {
             #rotate-overlay { display: flex; }
         }
+
+        #rules-link-btn { background: transparent; border: none; color: #8ab89a; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; margin-bottom: 18px; text-decoration: underline; cursor: pointer; }
+
+        #rules-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 200; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 20px 40px; }
+        #rules-content { max-width: 560px; margin: 0 auto; color: #dfe8e2; }
+        .rules-title { color: #fff; font-size: clamp(24px, 7vw, 30px); font-weight: 900; text-align: center; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,204,0,0.4); }
+        #rules-content h3 { color: #ffcc00; font-size: clamp(16px, 4.5vw, 19px); font-weight: 800; margin-top: 22px; margin-bottom: 8px; }
+        #rules-content p { font-size: clamp(14px, 4vw, 16px); line-height: 1.5; margin-bottom: 4px; }
+        #rules-content ul { margin: 8px 0 8px 20px; padding: 0; }
+        #rules-content li { font-size: clamp(14px, 4vw, 16px); line-height: 1.5; margin-bottom: 8px; }
+        #rules-content .menu-btn { width: 100%; margin-top: 28px; }
     </style>
 
 </head>
@@ -191,12 +202,12 @@
 
 <div id="setup-overlay">
     <h1>Soccer Strategy</h1>
+    <button id="rules-link-btn" onclick="document.getElementById('rules-overlay').classList.remove('hidden')">&#8505; Come si gioca</button>
     <div id="mode-buttons">
         <button class="menu-btn neutral" id="mode-btn-2p" onclick="selectMode('2p')">1 vs 1 Locale</button>
         <button class="menu-btn neutral" id="mode-btn-cpu" onclick="selectMode('cpu')">Contro CPU</button>
-
-
     </div>
+
     <div id="name-inputs" class="hidden">
         <div id="name-fields-2p" class="hidden">
             <input type="text" id="input-nameA" placeholder="Nome Squadra 1" maxlength="14">
@@ -219,6 +230,47 @@
         </label>
 
         <button class="menu-btn primary" onclick="confirmSetup()">Inizia Partita</button>
+    </div>
+</div>
+
+</div>
+
+<div id="rules-overlay" class="hidden">
+    <div id="rules-content">
+        <h2 class="rules-title">Come si gioca</h2>
+
+        <h3>Obiettivo</h3>
+        <p>Fai pi&ugrave; gol dell'avversario. Ogni squadra ha a disposizione un numero di azioni per tempo (impostabile nel menu), alternandosi tra attacco e difesa.</p>
+
+        <h3>Il campo</h3>
+        <p>10 pallini rappresentano entrambe le squadre insieme: <b>2-3-4</b> sono la difesa di chi attacca e l'attacco di chi difende. <b>5-6-7-8</b> &egrave; il centrocampo, condiviso. <b>9-10-11</b> sono l'attacco di chi attacca e la difesa di chi difende. La porta &egrave; divisa in tre zone: <b>A</b>, <b>B</b>, <b>C</b>.</p>
+
+        <h3>Come si svolge un'azione</h3>
+        <p>Chi attacca sceglie di nascosto un percorso: un difensore, un centrocampista, un attaccante, e infine dove tirare (A/B/C). Chi difende, nello stesso momento, prova a indovinare gli stessi valori per intercettare la palla, zona per zona.</p>
+
+        <h3>Intercettazione</h3>
+        <p>Se il difensore indovina il valore giusto in una zona, la palla viene intercettata l&igrave;. Se il tiro non viene intercettato in nessuna zona, si arriva al tiro: se il portiere indovina la zona della porta, para; altrimenti &egrave; gol.</p>
+
+        <h3>Ripartenza dopo un'intercettazione</h3>
+        <p>La squadra che recupera palla riparte proprio da dove l'ha intercettata, non da zero:</p>
+        <ul>
+            <li><b>Intercetto nella propria area di difesa</b> &rarr; si riparte dal centrocampo (3 scelte: centrocampo, attacco, tiro)</li>
+            <li><b>Intercetto a centrocampo</b> &rarr; essendo condiviso, serve un altro pallino di centrocampo diverso da quello appena giocato, poi attacco e tiro (3 scelte)</li>
+            <li><b>Intercetto nella propria area d'attacco</b> &rarr; si &egrave; gi&agrave; in posizione avanzata, basta il tiro (1 sola scelta)</li>
+            <li><b>Il portiere para</b> &rarr; si riparte da capo con la sequenza completa (rimessa dal fondo)</li>
+        </ul>
+
+        <h3>Tempi e turni</h3>
+        <p>Le squadre si alternano tra attacco e difesa un'azione alla volta, fino a esaurire le azioni disponibili per il primo tempo. Nel secondo tempo inizia ad attaccare chi ha difeso per primo nel primo tempo. In caso di gol, si riparte regolarmente dal turno successivo.</p>
+
+        <h3>Modalit&agrave; di gioco</h3>
+        <p><b>1 vs 1 Locale</b>: due giocatori sullo stesso dispositivo, passandoselo a ogni cambio turno. <b>Contro CPU</b>: la CPU sceglie in modo casuale, con una breve pausa di "pensiero". <b>Solo rigori</b>: salta la partita e va direttamente ai rigori. <b>Modalit&agrave; flash</b>: riduce drasticamente le attese di suspense, per partite pi&ugrave; rapide.</p>
+
+        <h3>I calci di rigore</h3>
+        <p>In caso di parit&agrave; a fine partita, si tirano 5 rigori a testa, alternati. Se il pareggio resta dopo i primi 5, si va a oltranza: un rigore a testa finch&eacute; in uno stesso turno una squadra segna e l'altra no.</p>
+        <p>Il tiratore sceglie di nascosto una casella della porta, il portiere prova a indovinarla. Dal 6&deg; rigore in poi, le caselle iniziano a fondersi a scaglioni di 5 (da 6 a 5, poi 4, infine 3), rendendo il portiere via via pi&ugrave; forte &mdash; proprio come capita in una serie di rigori molto lunga nella realt&agrave;.</p>
+
+        <button class="menu-btn primary" onclick="document.getElementById('rules-overlay').classList.add('hidden')">Ho capito, chiudi</button>
     </div>
 </div>
 
