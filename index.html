@@ -457,20 +457,6 @@
 
 <script>
 
-    function setAppHeight() {
-        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        document.documentElement.style.setProperty('--app-height', vh + 'px');
-    }
-    setAppHeight();
-    window.addEventListener('resize', setAppHeight);
-    window.addEventListener('orientationchange', setAppHeight);
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', setAppHeight);
-        window.visualViewport.addEventListener('scroll', setAppHeight);
-    }
-
-setInterval(setAppHeight, 400);
-
     let audioCtx = null;
     function getAudioCtx() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -846,9 +832,6 @@ setInterval(setAppHeight, 400);
         document.getElementById('pen-table').innerHTML = html;
         document.getElementById('pen-score-live').innerText = `${penScoreA} - ${penScoreB}`;
     }
-
-    function penRowHtml(teamKey, name, history, blockStart) {
-        let indicator = '';
 
     function penRowHtml(teamKey, name, history, blockStart) {
         let indicator = '';
