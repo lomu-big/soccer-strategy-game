@@ -246,7 +246,7 @@
         <p>10 pallini rappresentano entrambe le squadre insieme: <b>2-3-4</b> sono la difesa di chi attacca e l'attacco di chi difende. <b>5-6-7-8</b> &egrave; il centrocampo, condiviso. <b>9-10-11</b> sono l'attacco di chi attacca e la difesa di chi difende. La porta &egrave; divisa in tre zone: <b>A</b>, <b>B</b>, <b>C</b>.</p>
 
         <h3>Come si svolge un'azione</h3>
-        <p>Chi attacca sceglie di nascosto un percorso: un difensore, un centrocampista, un attaccante, e infine dove tirare (A/B/C). Chi difende, nello stesso momento, prova a indovinare gli stessi valori per intercettare la palla, zona per zona.</p>
+        <p>Chi attacca sceglie di nascosto un percorso: un difensore, un centrocampista, un attaccante, e infine dove tirare (A/B/C). Poi tocca a chi difende: senza aver visto le scelte dell'attaccante, prova a indovinare quegli stessi valori, zona per zona, per intercettare la palla.</p>
 
         <h3>Intercettazione</h3>
         <p>Se il difensore indovina il valore giusto in una zona, la palla viene intercettata l&igrave;. Se il tiro non viene intercettato in nessuna zona, si arriva al tiro: se il portiere indovina la zona della porta, para; altrimenti &egrave; gol.</p>
@@ -558,7 +558,11 @@
     let actionsPerHalf = 3;
     let actionsA = 3, actionsB = 3;
     let currentHalf = 1;
+
+    function pickRandomTeam() { return Math.random() < 0.5 ? 'A' : 'B'; }
+
     let firstHalfStarter = 'A'; 
+
 
     let gameMode = '2p';
         let nameA = 'Squadra A';
@@ -682,7 +686,8 @@
         document.getElementById('final-overlay').classList.add('hidden');
         populatePenaltyCrowd();
 
-        penFirstTeam = Math.random() < 0.5 ? 'A' : 'B';
+        penFirstTeam = pickRandomTeam();
+
         penHistoryA = [];
         penHistoryB = [];
         penScoreA = 0;
@@ -974,6 +979,10 @@ updateSequenceDisplay();
         }
 
         flashMode = document.getElementById('input-flash-mode').checked;
+
+        const startingTeam = pickRandomTeam();
+        firstHalfStarter = startingTeam;
+        attackingTeam = startingTeam;
 
         if (document.getElementById('input-penalty-only').checked) {
 
