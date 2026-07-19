@@ -217,6 +217,8 @@
             <input type="text" id="input-nameHuman" placeholder="Nome della tua squadra" maxlength="14">
         </div>
 
+        <button id="use-last-names-btn" class="hidden" onclick="fillLastNames()" style="background:transparent;border:none;color:#8ab89a;font-size:clamp(13px,3.6vw,15px);font-weight:700;text-decoration:underline;cursor:pointer;margin-bottom:4px;">Usa gli ultimi nomi</button>
+
         <div id="actions-field">
             <label for="input-actions">Azioni a testa per tempo (1-5)</label>
             <input type="number" id="input-actions" min="1" max="5" placeholder="3">
@@ -640,19 +642,29 @@
             document.getElementById('actions-field').classList.toggle('hidden', checked);
         }
 
-        function prefillSavedNames() {
+        function fillLastNames() {
             const data = loadGameData();
-            if (data.lastNameA) document.getElementById('input-nameA').value = data.lastNameA;
-            if (data.lastNameB) document.getElementById('input-nameB').value = data.lastNameB;
-            if (data.lastNameHuman) document.getElementById('input-nameHuman').value = data.lastNameHuman;
+            if (gameMode === '2p') {
+                if (data.lastNameA) document.getElementById('input-nameA').value = data.lastNameA;
+                if (data.lastNameB) document.getElementById('input-nameB').value = data.lastNameB;
+            } else {
+                if (data.lastNameHuman) document.getElementById('input-nameHuman').value = data.lastNameHuman;
+            }
         }
-        prefillSavedNames();
+
+        function updateUseLastNamesVisibility() {
+            const data = loadGameData();
+            const btn = document.getElementById('use-last-names-btn');
+            const hasRelevant = gameMode === '2p' ? (data.lastNameA || data.lastNameB) : data.lastNameHuman;
+            btn.classList.toggle('hidden', !hasRelevant);
+        }
 
         function selectMode(mode) {
         gameMode = mode;
         document.getElementById('name-inputs').classList.remove('hidden');
         document.getElementById('name-fields-2p').classList.toggle('hidden', mode !== '2p');
         document.getElementById('name-fields-cpu').classList.toggle('hidden', mode !== 'cpu');
+        updateUseLastNamesVisibility();
 
         const btn2p = document.getElementById('mode-btn-2p');
         const btnCpu = document.getElementById('mode-btn-cpu');
