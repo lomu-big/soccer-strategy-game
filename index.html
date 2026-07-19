@@ -177,10 +177,17 @@
         #btn-start { padding: 16px 40px; font-size: clamp(15px, 4.5vw, 19px); background: linear-gradient(180deg,#ffdd55,#ffb700); color: #1a1200; border: none; border-radius: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 5px 0 #8a6a00, 0 8px 16px rgba(0,0,0,0.45); }
         
         .hidden { display: none !important; }
+
+        #rotate-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: #0c1f14; color: #ffcc00; font-size: clamp(20px, 6vw, 28px); font-weight: 800; text-align: center; align-items: center; justify-content: center; padding: 40px; }
+        @media (orientation: landscape) and (max-height: 550px) {
+            #rotate-overlay { display: flex; }
+        }
     </style>
+
 </head>
 <body>
 
+<div id="rotate-overlay">Ruota il dispositivo in verticale per giocare &#128241;</div>
 
 <div id="setup-overlay">
     <h1>Soccer Strategy</h1>
@@ -203,9 +210,14 @@
             <label for="input-actions">Azioni a testa per tempo (1-5)</label>
             <input type="number" id="input-actions" min="1" max="5" placeholder="3">
         </div>
+
         <label id="penalty-only-label" style="display:flex;align-items:center;gap:8px;color:#ffcc00;font-weight:700;font-size:clamp(13px,3.6vw,16px);">
             <input type="checkbox" id="input-penalty-only" onchange="togglePenaltyOnly()"> Solo rigori (salta la partita)
         </label>
+        <label id="flash-mode-label" style="display:flex;align-items:center;gap:8px;color:#ffcc00;font-weight:700;font-size:clamp(13px,3.6vw,16px);">
+            <input type="checkbox" id="input-flash-mode"> Modalit&agrave; flash (animazioni veloci)
+        </label>
+
         <button class="menu-btn primary" onclick="confirmSetup()">Inizia Partita</button>
     </div>
 </div>
@@ -837,9 +849,10 @@ setInterval(setAppHeight, 400);
 
     function penRowHtml(teamKey, name, history, blockStart) {
         let indicator = '';
-        if (penActiveTeam === teamKey) {
-            if (penActiveRole === 'tira') indicator = '<br><span class="pen-role-label tira">TIRA</span>';
-            else if (penActiveRole === 'para') indicator = '<br><span class="pen-role-label para">PARA</span>';
+
+            if (penActiveRole === 'tira') indicator = '<br><span class="pen-role-label tira">&#9650; TIRA</span>';
+            else if (penActiveRole === 'para') indicator = '<br><span class="pen-role-label para">&#9632; PARA</span>';
+
         }
         let row = `<tr><td>${name}${indicator}</td>`;
         for (let i = 0; i < 5; i++) {
@@ -898,7 +911,10 @@ updateSequenceDisplay();
         document.getElementById('input-nameB').value = '';
         document.getElementById('input-nameHuman').value = '';
         document.getElementById('input-actions').value = '';
+
         document.getElementById('input-penalty-only').checked = false;
+        document.getElementById('input-flash-mode').checked = false;
+        flashMode = false;
         document.getElementById('actions-field').classList.remove('hidden');
         document.getElementById('name-inputs').classList.add('hidden');
         document.getElementById('name-fields-2p').classList.add('hidden');
@@ -919,7 +935,10 @@ updateSequenceDisplay();
             nameB = 'CPU';
         }
 
+        flashMode = document.getElementById('input-flash-mode').checked;
+
         if (document.getElementById('input-penalty-only').checked) {
+
             document.getElementById('setup-overlay').classList.add('hidden');
             scoreA = 0;
             scoreB = 0;
@@ -942,7 +961,8 @@ updateSequenceDisplay();
 
 overlayTeam.innerText = teamName(attackingTeam);
 
-        overlayRole.innerText = "Fase di ATTACCO";
+        overlayRole.innerText = "\u25B2 Fase di ATTACCO";
+
         overlayRole.classList.remove('defense');
         overlayRole.classList.add('attack');
 
@@ -978,7 +998,8 @@ overlayTeam.innerText = teamName(attackingTeam);
     const controls = document.getElementById('controls');
     const commentaryBanner = document.getElementById('commentary-banner');
 
-    const delay = ms => new Promise(res => setTimeout(res, ms));
+    let flashMode = false;
+    const delay = ms => new Promise(res => setTimeout(res, flashMode ? Math.min(ms, 150) : ms));
 
     document.getElementById('btn-start').addEventListener('click', () => {
         setAppHeight();
@@ -1046,7 +1067,9 @@ overlayTeam.innerText = teamName(attackingTeam);
         phaseB.textContent = ''; phaseB.classList.remove('attack', 'defense');
 
         const movingTeam = isAttackerPhase ? attackingTeam : (attackingTeam === 'A' ? 'B' : 'A');
-        const label = isAttackerPhase ? 'Fase di attacco' : 'Fase di difesa';
+
+        const label = isAttackerPhase ? '\u25B2 Fase di attacco' : '\u25A0 Fase di difesa';
+
         const cssClass = isAttackerPhase ? 'attack' : 'defense';
         const activeClass = isAttackerPhase ? 'active-attack' : 'active-defense';
 
@@ -1129,7 +1152,8 @@ overlayTeam.innerText = teamName(attackingTeam);
 
         overlayTeam.innerText = teamName(attackingTeam === 'A' ? 'B' : 'A');
 
-        overlayRole.innerText = "Fase di DIFESA";
+        overlayRole.innerText = "\u25A0 Fase di DIFESA";
+
         overlayRole.classList.remove('attack');
         overlayRole.classList.add('defense');
 
@@ -1261,7 +1285,8 @@ commentaryBanner.innerText = (currentDefenseStep === 3) ? "PARATA!" : "INTERCETT
 
         overlayTeam.innerText = teamName(attackingTeam);
 
-        overlayRole.innerText = "Fase di ATTACCO";
+        overlayRole.innerText = "\u25B2 Fase di ATTACCO";
+
         overlayRole.classList.remove('defense');
         overlayRole.classList.add('attack');
 
