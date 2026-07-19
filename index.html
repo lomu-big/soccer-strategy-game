@@ -942,7 +942,7 @@ updateSequenceDisplay();
         document.getElementById('scoreboard').classList.remove('hidden');
         document.getElementById('score-row').classList.remove('hidden');
         document.getElementById('pitch-container').classList.remove('hidden');
-        setAppHeight();
+
         updateScoreboard();
 
 overlayTeam.innerText = teamName(attackingTeam);
@@ -988,7 +988,7 @@ overlayTeam.innerText = teamName(attackingTeam);
     const delay = ms => new Promise(res => setTimeout(res, flashMode ? Math.min(ms, 150) : ms));
 
     document.getElementById('btn-start').addEventListener('click', () => {
-        setAppHeight();
+
         overlay.classList.add('hidden');
         document.getElementById('scoreboard').classList.remove('hidden');
         document.getElementById('score-row').classList.remove('hidden');
