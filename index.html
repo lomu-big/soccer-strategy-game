@@ -1007,10 +1007,22 @@ updateSequenceDisplay();
             nameA = a || 'Squadra A';
             nameB = b || 'Squadra B';
         } else {
+
+        } else {
             const h = document.getElementById('input-nameHuman').value.trim();
             nameA = h || 'Squadra A';
             nameB = 'CPU';
         }
+
+        const savedData = loadGameData();
+        if (gameMode === '2p') {
+            savedData.lastNameA = nameA;
+            savedData.lastNameB = nameB;
+        } else {
+            savedData.lastNameHuman = nameA;
+        }
+        saveGameData(savedData);
+
 
         flashMode = document.getElementById('input-flash-mode').checked;
 
