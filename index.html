@@ -850,11 +850,14 @@ setInterval(setAppHeight, 400);
     function penRowHtml(teamKey, name, history, blockStart) {
         let indicator = '';
 
+    function penRowHtml(teamKey, name, history, blockStart) {
+        let indicator = '';
+        if (penActiveTeam === teamKey) {
             if (penActiveRole === 'tira') indicator = '<br><span class="pen-role-label tira">&#9650; TIRA</span>';
             else if (penActiveRole === 'para') indicator = '<br><span class="pen-role-label para">&#9632; PARA</span>';
-
         }
         let row = `<tr><td>${name}${indicator}</td>`;
+
         for (let i = 0; i < 5; i++) {
             const idx = blockStart - 1 + i;
             const val = history[idx];
