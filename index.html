@@ -196,7 +196,11 @@
         #rules-content .menu-btn { width: 100%; margin-top: 28px; }
 
         #stats-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0c1f14; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px); z-index: 200; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 20px 40px; }
+
         .stat-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+        .stat-card.cpu-card { background: rgba(47,134,255,0.14); border: 1px solid rgba(47,134,255,0.5); }
+        .stat-card.cpu-card .stat-name { color: #7db0ff; }
+
         .stat-card .stat-name { color: #ffcc00; font-weight: 800; font-size: clamp(15px, 4.2vw, 17px); margin-bottom: 6px; }
         .stat-card .stat-line { color: #dfe8e2; font-size: clamp(13px, 3.6vw, 15px); line-height: 1.5; }
         .stats-empty { color: #7a8f80; font-size: 14px; font-style: italic; }
@@ -622,22 +626,37 @@
         document.getElementById('stats-overlay').classList.remove('hidden');
     }
 
+    function statCardHtml(t, isCpu) {
+        const pct = n => t.played > 0 ? Math.round(n / t.played * 100) : 0;
+        return `
+            <div class="stat-card${isCpu ? ' cpu-card' : ''}">
+                <div class="stat-name">${t.displayName}</div>
+                <div class="stat-line">Partite: ${t.played} &nbsp; V: ${t.won} (${pct(t.won)}%) &nbsp; N: ${t.drawn} (${pct(t.drawn)}%) &nbsp; P: ${t.lost} (${pct(t.lost)}%)</div>
+                <div class="stat-line">Gol: ${t.goalsFor} - ${t.goalsAgainst} &nbsp; Azioni totali: ${t.actionsTotal}</div>
+                <div class="stat-line">Rigori: ${t.penaltyWins} vinti - ${t.penaltyLosses} persi</div>
+            </div>
+        `;
+    }
+
     function renderStats() {
         const data = loadGameData();
-        const teams = Object.values(data.teamStats || {}).sort((a, b) => b.played - a.played);
+        const allTeams = Object.values(data.teamStats || {});
+        const cpuStat = allTeams.find(t => teamKey(t.displayName) === 'cpu');
+        const humanTeams = allTeams.filter(t => teamKey(t.displayName) !== 'cpu').sort((a, b) => b.played - a.played);
+
         const teamsEl = document.getElementById('stats-teams-list');
-        if (teams.length === 0) {
-            teamsEl.innerHTML = '<p class="stats-empty">Nessuna partita registrata ancora.</p>';
+        let html = '';
+
+        const cpuPlaceholder = { displayName: 'CPU', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, actionsTotal: 0, penaltyWins: 0, penaltyLosses: 0 };
+        html += statCardHtml(cpuStat || cpuPlaceholder, true);
+
+        if (humanTeams.length === 0) {
+            html += '<p class="stats-empty">Nessuna partita contro squadre umane registrata ancora.</p>';
         } else {
-            teamsEl.innerHTML = teams.map(t => `
-                <div class="stat-card">
-                    <div class="stat-name">${t.displayName}</div>
-                    <div class="stat-line">Partite: ${t.played} &nbsp; V: ${t.won} &nbsp; N: ${t.drawn} &nbsp; P: ${t.lost}</div>
-                    <div class="stat-line">Gol: ${t.goalsFor} - ${t.goalsAgainst} &nbsp; Azioni totali: ${t.actionsTotal}</div>
-                    <div class="stat-line">Rigori: ${t.penaltyWins} vinti - ${t.penaltyLosses} persi</div>
-                </div>
-            `).join('');
+            html += humanTeams.map(t => statCardHtml(t, false)).join('');
         }
+
+        teamsEl.innerHTML = html;
 
         const history = data.matchHistory || [];
         const histEl = document.getElementById('stats-history-list');
@@ -1135,14 +1154,17 @@ updateSequenceDisplay();
     }
 
         function confirmSetup() {
+
         if (gameMode === '2p') {
-            const a = document.getElementById('input-nameA').value.trim();
-            const b = document.getElementById('input-nameB').value.trim();
+            let a = document.getElementById('input-nameA').value.trim();
+            let b = document.getElementById('input-nameB').value.trim();
+            if (a.toLowerCase() === 'cpu') a = '';
+            if (b.toLowerCase() === 'cpu') b = '';
             nameA = a || 'Squadra A';
             nameB = b || 'Squadra B';
         } else {
-
-            const h = document.getElementById('input-nameHuman').value.trim();
+            let h = document.getElementById('input-nameHuman').value.trim();
+            if (h.toLowerCase() === 'cpu') h = '';
             nameA = h || 'Squadra A';
             nameB = 'CPU';
         }
